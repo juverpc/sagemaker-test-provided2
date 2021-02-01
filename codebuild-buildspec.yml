@@ -11,7 +11,7 @@ phases:
     commands:
       - export PYTHONUNBUFFERED=TRUE
       - export SAGEMAKER_PROJECT_NAME_ID="${SAGEMAKER_PROJECT_NAME}-${SAGEMAKER_PROJECT_ID}"
-      - |
+      - git clone https://github.com/juverpc/terraform-sagemaker-sample-1.git
         run-pipeline --module-name pipelines.abalone.pipeline \
           --role-arn $SAGEMAKER_PIPELINE_ROLE_ARN \
           --tags "[{\"Key\":\"sagemaker:project-name\", \"Value\":\"${SAGEMAKER_PROJECT_NAME}\"}, {\"Key\":\"sagemaker:project-id\", \"Value\":\"${SAGEMAKER_PROJECT_ID}\"}]" \
