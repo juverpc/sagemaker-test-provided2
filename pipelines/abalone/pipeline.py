@@ -99,8 +99,8 @@ def get_pipeline(
     )
     input_data = ParameterString(
         name="InputDataUrl",
-        #default_value=f"s3://sagemaker-servicecatalog-seedcode-{region}/dataset/abalone-dataset.csv",
-         default_value=f"s3://sagemaker-servicecatalog-seedcode-{region}/dataset/test-dataset.csv",
+         default_value=f"s3://sagemaker-servicecatalog-seedcode-{region}/dataset/abalone-dataset.csv",
+         
     )
 
     # processing step for feature engineering
@@ -108,7 +108,7 @@ def get_pipeline(
         framework_version="0.23-1",
         instance_type=processing_instance_type,
         instance_count=processing_instance_count,
-        base_job_name=f"{base_job_prefix}/sklearn-abalone-preprocess",
+        base_job_name=f"{base_job_prefix}/sklearn-test-preprocess",
         sagemaker_session=sagemaker_session,
         role=role,
     )
