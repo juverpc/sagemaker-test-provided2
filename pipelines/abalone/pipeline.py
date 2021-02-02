@@ -1,11 +1,9 @@
 """Example workflow pipeline script for abalone pipeline.
-
                                                . -RegisterModel
                                               .
     Process-> Train -> Evaluate -> Condition .
                                               .
                                                . -(stop)
-
 Implements a get_pipeline(**kwargs) method.
 """
 import os
@@ -49,11 +47,9 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 def get_session(region, default_bucket):
     """Gets the sagemaker session based on the region.
-
     Args:
         region: the aws region to start the session
         default_bucket: the bucket to use for storing the artifacts
-
     Returns:
         `sagemaker.session.Session instance
     """
@@ -74,17 +70,15 @@ def get_pipeline(
     region,
     role=None,
     default_bucket=None,
-    model_package_group_name="AbalonePackageGroup",
-    pipeline_name="AbalonePipeline",
-    base_job_prefix="Abalone",
+    model_package_group_name="TestckageGroup",
+    pipeline_name="TestPipeline",
+    base_job_prefix="Test",
 ):
     """Gets a SageMaker ML Pipeline instance working with on abalone data.
-
     Args:
         region: AWS region to create and run the pipeline.
         role: IAM role to create and run steps and pipeline.
         default_bucket: the bucket to use for storing the artifacts
-
     Returns:
         an instance of a pipeline
     """
@@ -105,7 +99,8 @@ def get_pipeline(
     )
     input_data = ParameterString(
         name="InputDataUrl",
-        default_value=f"s3://sagemaker-servicecatalog-seedcode-{region}/dataset/abalone-dataset.csv",
+        #default_value=f"s3://sagemaker-servicecatalog-seedcode-{region}/dataset/abalone-dataset.csv",
+         default_value=f"s3://sagemaker-servicecatalog-seedcode-{region}/dataset/test-dataset.csv",
     )
 
     # processing step for feature engineering
@@ -118,7 +113,7 @@ def get_pipeline(
         role=role,
     )
     step_process = ProcessingStep(
-        name="PreprocessAbaloneData",
+        name="PreprocessTestData",
         processor=sklearn_processor,
         outputs=[
             ProcessingOutput(output_name="train", source="/opt/ml/processing/train"),
@@ -130,7 +125,7 @@ def get_pipeline(
     )
 
     # training step for generating model artifacts
-    model_path = f"s3://{sagemaker_session.default_bucket()}/{base_job_prefix}/AbaloneTrain"
+    model_path = f"s3://{sagemaker_session.default_bucket()}/{base_job_prefix}/TestTrain"
     image_uri = sagemaker.image_uris.retrieve(
         framework="xgboost",
         region=region,
@@ -143,7 +138,7 @@ def get_pipeline(
         instance_type=training_instance_type,
         instance_count=1,
         output_path=model_path,
-        base_job_name=f"{base_job_prefix}/abalone-train",
+        base_job_name=f"{base_job_prefix}/test-train",
         sagemaker_session=sagemaker_session,
         role=role,
     )
@@ -158,7 +153,7 @@ def get_pipeline(
         silent=0,
     )
     step_train = TrainingStep(
-        name="TrainAbaloneModel",
+        name="TrainTestModel",
         estimator=xgb_train,
         inputs={
             "train": TrainingInput(
@@ -182,17 +177,17 @@ def get_pipeline(
         command=["python3"],
         instance_type=processing_instance_type,
         instance_count=1,
-        base_job_name=f"{base_job_prefix}/script-abalone-eval",
+        base_job_name=f"{base_job_prefix}/script-test-eval",
         sagemaker_session=sagemaker_session,
         role=role,
     )
     evaluation_report = PropertyFile(
-        name="AbaloneEvaluationReport",
+        name="TestEvaluationReport",
         output_name="evaluation",
         path="evaluation.json",
     )
     step_eval = ProcessingStep(
-        name="EvaluateAbaloneModel",
+        name="EvaluateTestModel",
         processor=script_eval,
         inputs=[
             ProcessingInput(
@@ -223,7 +218,7 @@ def get_pipeline(
         )
     )
     step_register = RegisterModel(
-        name="RegisterAbaloneModel",
+        name="RegisterTestModel",
         estimator=xgb_train,
         model_data=step_train.properties.ModelArtifacts.S3ModelArtifacts,
         content_types=["text/csv"],
@@ -245,7 +240,7 @@ def get_pipeline(
         right=6.0,
     )
     step_cond = ConditionStep(
-        name="CheckMSEAbaloneEvaluation",
+        name="CheckMSETestEvaluation",
         conditions=[cond_lte],
         if_steps=[step_register],
         else_steps=[],
