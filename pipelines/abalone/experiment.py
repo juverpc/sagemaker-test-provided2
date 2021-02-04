@@ -39,8 +39,8 @@ class Experiment(_base_types.Record):
         tags (List[dict[str, str]]): A list of tags to associate with the experiment.
     """
 
-    experiment_name = None
-    description = None
+    experiment_name = "experiment-test"
+    description = "this is a test"
     tags = None
 
     _boto_create_method = "create_experiment"
