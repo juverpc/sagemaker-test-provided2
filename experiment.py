@@ -39,8 +39,8 @@ class Experiment(_base_types.Record):
         tags (List[dict[str, str]]): A list of tags to associate with the experiment.
     """
 
-    experiment_name = None
-    description = None
+    experiment_name = "tes-experiment-jose"
+    description = "This is a test"
     tags = None
 
     _boto_create_method = "create_experiment"
@@ -86,7 +86,7 @@ class Experiment(_base_types.Record):
         )
 
     @classmethod
-    def create(cls, experiment_name=None, description=None, tags=None, sagemaker_boto_client=None):
+    def create(cls, experiment_name=none, description=none, tags=None, sagemaker_boto_client=None):
         """
         Create a new experiment in SageMaker and return an ``Experiment`` object.
         Args:
@@ -106,157 +106,6 @@ class Experiment(_base_types.Record):
             sagemaker_boto_client=sagemaker_boto_client,
         )
 
-    @classmethod
-    def list(
-        cls,
-        created_before=None,
-        created_after=None,
-        sort_by=None,
-        sort_order=None,
-        sagemaker_boto_client=None,
-    ):
-        """
-        List experiments. Returns experiments in the account matching the specified criteria.
-        Args:
-            created_before: (datetime.datetime, optional): Return experiments created before this
-                instant.
-            created_after: (datetime.datetime, optional): Return experiments created after this
-                instant.
-            sort_by (str, optional): Which property to sort results by. One of
-                'Name', 'CreationTime'.
-            sort_order (str, optional): One of 'Ascending', or 'Descending'.
-            sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker. If not
-                supplied, a default boto3 client will be used.
-        Returns:
-            collections.Iterator[sagemaker.experiments.api_types.ExperimentSummary] : An iterator
-                over experiment summaries matching the specified criteria.
-        """
-        return super(Experiment, cls)._list(
-            "list_experiments",
-            api_types.ExperimentSummary.from_boto,
-            "ExperimentSummaries",
-            created_before=created_before,
-            created_after=created_after,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            sagemaker_boto_client=sagemaker_boto_client,
-        )
+    
 
-    @classmethod
-    def search(
-        cls,
-        search_expression=None,
-        sort_by=None,
-        sort_order=None,
-        max_results=None,
-        sagemaker_boto_client=None,
-    ):
-        """
-        Search experiments. Returns SearchResults in the account matching the search criteria.
-        Args:
-            search_expression: (dict, optional): A Boolean conditional statement. Resource objects
-                must satisfy this condition to be included in search results. You must provide at
-                least one subexpression, filter, or nested filter.
-            sort_by (str, optional): The name of the resource property used to sort the SearchResults.
-                The default is LastModifiedTime
-            sort_order (str, optional): How SearchResults are ordered. Valid values are Ascending or
-                Descending . The default is Descending .
-            max_results (int, optional): The maximum number of results to return in a SearchResponse.
-            sagemaker_boto_client (SageMaker.Client, optional): Boto3 client for SageMaker. If not
-                supplied, a default boto3 client will be used.
-        Returns:
-            collections.Iterator[SearchResult] : An iterator over search results matching the search criteria.
-        """
-        return super(Experiment, cls)._search(
-            search_resource="Experiment",
-            search_item_factory=api_types.ExperimentSearchResult.from_boto,
-            search_expression=None if search_expression is None else search_expression.to_boto(),
-            sort_by=sort_by,
-            sort_order=sort_order,
-            max_results=max_results,
-            sagemaker_boto_client=sagemaker_boto_client,
-        )
-
-    def list_trials(self, created_before=None, created_after=None, sort_by=None, sort_order=None):
-        """List trials in this experiment matching the specified criteria.
-        Args:
-            created_before (datetime.datetime, optional): Return trials created before this instant.
-            created_after (datetime.datetime, optional): Return trials created after this instant.
-            sort_by (str, optional): Which property to sort results by. One of 'Name',
-                'CreationTime'.
-            sort_order (str, optional): One of 'Ascending', or 'Descending'.
-        Returns:
-            collections.Iterator[sagemaker.experiments.api_types.TrialSummary] : An iterator over
-                trials matching the criteria.
-        """
-        return trial.Trial.list(
-            experiment_name=self.experiment_name,
-            created_before=created_before,
-            created_after=created_after,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            sagemaker_boto_client=self.sagemaker_boto_client,
-        )
-
-    def create_trial(self, trial_name=None, trial_name_prefix="SageMakerTrial"):
-        """Create a trial in this experiment.
-        Since trial names are expected to be unique in an account, ``trial_name_prefix`` can be provided
-        instead of ``trial_name``. In this case a unique name will be generated that begins with the specified
-        prefix.
-        Args:
-            trial_name (str): Name of the trial.
-            trial_name_prefix (str): Prefix for the trial name if you want SageMaker to
-                auto-generate the trial name.
-        Returns:
-            sagemaker.experiments.trial.Trial : A SageMaker ``Trial`` object representing the
-                created trial.
-        """
-        if not trial_name:
-            trial_name = _utils.name(trial_name_prefix)
-        return trial.Trial.create(
-            trial_name=trial_name,
-            experiment_name=self.experiment_name,
-            sagemaker_boto_client=self.sagemaker_boto_client,
-        )
-
-    def delete_all(self, action):
-        """
-        Force to delete the experiment and associated trials, trial components under the experiment.
-        Args:
-            action (str): pass in string '--force' to confirm recursively delete all the experiments, trials,
-            and trial components.
-        """
-        if action != "--force":
-            raise ValueError(
-                "Must confirm with string '--force' in order to delete the experiment and "
-                "associated trials, trial components."
-            )
-
-        delete_attempt_count = 0
-        last_exception = None
-        while True:
-            if delete_attempt_count == self.MAX_DELETE_ALL_ATTEMPTS:
-                raise Exception(
-                    "Failed to delete, please try again.") from last_exception
-            try:
-                for trial_summary in self.list_trials():
-                    t = trial.Trial.load(
-                        sagemaker_boto_client=self.sagemaker_boto_client, trial_name=trial_summary.trial_name
-                    )
-                    for trial_component_summary in t.list_trial_components():
-                        tc = trial_component.TrialComponent.load(
-                            sagemaker_boto_client=self.sagemaker_boto_client,
-                            trial_component_name=trial_component_summary.trial_component_name,
-                        )
-                        tc.delete(force_disassociate=True)
-                        # to prevent throttling
-                        time.sleep(1.2)
-                    t.delete()
-                    # to prevent throttling
-                    time.sleep(1.2)
-                self.delete()
-                break
-            except Exception as ex:
-                last_exception = ex
-            finally:
-                delete_attempt_count = delete_attempt_count + 1
+ 
