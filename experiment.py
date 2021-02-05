@@ -86,7 +86,7 @@ class Experiment(_base_types.Record):
         )
 
     @classmethod
-    def create(cls, experiment_name=none, description=none, tags=None, sagemaker_boto_client=None):
+    def create(cls, experiment_name, description, tags, sagemaker_boto_client):
         """
         Create a new experiment in SageMaker and return an ``Experiment`` object.
         Args:
