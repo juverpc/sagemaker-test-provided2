@@ -18,7 +18,8 @@ sagemaker_session = Session(sess)
 list_tuning_jobs_response = sm.list_hyper_parameter_tuning_jobs(
     SortBy="CreationTime", SortOrder="Descending"
 )
-print(f'Found {len(list_tuning_jobs_response["HyperParameterTuningJobSummaries"])} tuning jobs.')
+print(
+    f'Found {len(list_tuning_jobs_response["HyperParameterTuningJobSummaries"])} tuning jobs.')
 tuning_jobs = list_tuning_jobs_response["HyperParameterTuningJobSummaries"]
 most_recently_created_tuning_job = tuning_jobs[0]
 tuning_job_name = most_recently_created_tuning_job["HyperParameterTuningJobName"]
@@ -42,8 +43,9 @@ try:
     trial = Trial.load(trial_name=trial_name)
 except Exception as ex:
     if "ResourceNotFound" in str(ex):
-        trial = Trial.create(experiment_name=experiment_name, trial_name=trial_name)
-        
+        trial = Trial.create(
+            experiment_name=experiment_name, trial_name=trial_name)
+
 # get the trial components derived from the training jobs
 
 creation_time = most_recently_created_tuning_job["CreationTime"]
@@ -70,7 +72,8 @@ search_expression = SearchExpression(
 
 # search iterates over every page of results by default
 trial_component_search_results = list(
-    TrialComponent.search(search_expression=search_expression, sagemaker_boto_client=sm)
+    TrialComponent.search(
+        search_expression=search_expression, sagemaker_boto_client=sm)
 )
 print(f"Found {len(trial_component_search_results)} trial components.")
 
