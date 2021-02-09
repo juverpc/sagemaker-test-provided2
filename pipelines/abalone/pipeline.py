@@ -101,7 +101,7 @@ def get_pipeline(
         name="InputDataUrl",
          #default_value=f"s3://sagemaker-servicecatalog-seedcode-{region}/dataset/abalone-dataset.csv",
          #default_value=f"s3://sourcejuver/abalone-dataset.csv",
-         default_value=f"s3://sagemaker-project-output-{SageMakerProjectId}/abalone-dataset.csv"
+         default_value=f"s3://sagemaker-project-output-{SAGEMAKER_PROJECT_ID}/abalone-dataset.csv"
     )
 
     # processing step for feature engineering
