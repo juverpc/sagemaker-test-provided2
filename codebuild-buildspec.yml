@@ -12,7 +12,7 @@ phases:
     commands:
       - export PYTHONUNBUFFERED=TRUE
       - export SAGEMAKER_PROJECT_NAME_ID="${SAGEMAKER_PROJECT_NAME}-${SAGEMAKER_PROJECT_ID}"
-      - if [[ $MODEL == '' || $PIPELINE_NAME == ""  ]]; then echo "You have to add MODEL and PIPELINE NAME values"; else | \
+      - if [[ $MODEL == '' || $PIPELINE_NAME == ""  ]]; then echo "You have to add MODEL and PIPELINE NAME values"; else \
           run-pipeline --module-name pipelines.$MODEL.pipeline \
           --role-arn $SAGEMAKER_PIPELINE_ROLE_ARN \
           --tags "[{\"Key\":\"sagemaker:project-name\", \"Value\":\"${SAGEMAKER_PROJECT_NAME}\"}, {\"Key\":\"sagemaker:project-id\", \"Value\":\"${SAGEMAKER_PROJECT_ID}\"}]" \
